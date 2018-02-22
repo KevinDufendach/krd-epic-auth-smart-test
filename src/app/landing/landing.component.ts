@@ -18,16 +18,12 @@ export class LandingComponent implements OnInit {
     this.smartService.initialize(this.route).subscribe( sb => {
       this.getPatientName();
     });
-
   }
 
   getPatientName() {
-    console.log('getting patient name');
     this.smartService.getPatient().subscribe(patient => {
-      console.log('received pt again');
       this.ptFhir = patient;
       this.ptName = this.ptFhir.name[0].given + ' ' + this.ptFhir.name[0].family;
-
     });
   }
 }

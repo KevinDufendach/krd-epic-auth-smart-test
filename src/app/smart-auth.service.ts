@@ -43,9 +43,6 @@ export class SmartAuthService {
         // Load app parameters stored in session
         const sessionParams = JSON.parse(sessionStorage[state]);
 
-        console.log('session parameters');
-        console.log(sessionParams);
-
         this.serviceUri = sessionParams.serviceUri;
 
         if (sessionParams.accessToken && sessionParams.patientId) {
@@ -66,7 +63,6 @@ export class SmartAuthService {
 
           this.http.post(tokenUri, httpParams).subscribe(
             res => {
-              console.log('received data from server');
               this.sb = new SmartBundle(res['access_token'], res['patient']);
 
               sessionParams.accessToken = this.sb.accessToken;
