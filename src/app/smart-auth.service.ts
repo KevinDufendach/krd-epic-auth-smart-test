@@ -7,7 +7,7 @@ import {Patient} from 'fhir';
 import {ErrorObservable} from 'rxjs/observable/ErrorObservable';
 import {SmartBundle} from './SmartBundle';
 import {of} from 'rxjs/observable/of';
-import '/assets/config.js';
+import {AppConfig} from './app.config';
 
 @Injectable()
 export class SmartAuthService {
@@ -23,11 +23,44 @@ export class SmartAuthService {
   serviceUri: string;
   private sub: any;
   private sb: SmartBundle;
+  private config: AppConfig;
 
   constructor(private http: HttpClient) {
+    this.config = require('./config/app.config.json');
   }
 
+  connectToEndpoint(endpoint: string): Observable<SmartBundle> {
+    return new Observable<SmartBundle>(observer => {
+      const w = 0;
+      const h = 0;
+      const left = (screen.width / 2) - ( w / 2);
+      const top = ( screen.height / 2 ) - ( h / 2 );
 
+      const redirectUri = window.location.protocol + '//' + window.location.host + this.config.landingUri;
+
+      this.http.get(endpoint + 'metadata').subscribe( metadata => {
+        const jsMetadata = require('xml2js').parseFromString(metadata);
+        console.log(jsMetadata);
+      });
+
+      // // const clientId = 'e4b32d61-d82e-4de0-b6ff-0f8f5f3ba887';
+      // // const redirectUri = 'http://localhost:4200/afterlaunch';
+      // // const baseUri = 'https://open-ic.epic.com/argonaut';
+      // // const baseUri = 'https://epic-soap-test.uchealth.com/FHIRProxy';
+      // const win = window.open(this.config.launchUri +
+      // '/oauth2/authorize?response_type=code&client_id=' + clientId +
+      // '&redirect_uri=' + redirectUri,
+      //   '_blank', 'location=yes,height=' + h + ',width=' + w + ',top=' + top + ',left=' + left + 'scrollbars=yes,status=yes');
+      // window.setInterval(function() {
+      //   if (win.document.URL.indexOf('code') !== -1) {
+      //     window.clearInterval(this.checkConnect);
+      //     const url = win.document.URL;
+      //     win.opener.location.href = url;
+      //     win.close();
+      //   }
+      // }, 800);
+    });
+  }
 
   initialize(route: ActivatedRoute): Observable<SmartBundle> {
     if (this.sb) {

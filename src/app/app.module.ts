@@ -7,6 +7,7 @@ import { LandingComponent } from './landing/landing.component';
 import {HttpClientModule} from '@angular/common/http';
 import {RouterModule, Routes} from '@angular/router';
 import {SmartAuthService} from './smart-auth.service';
+import { EpicAuthComponent } from './epic-auth/epic-auth.component';
 
 const appRoutes: Routes = [
   {path: 'landing', component: LandingComponent}
@@ -15,7 +16,8 @@ const appRoutes: Routes = [
 @NgModule({
   declarations: [
     AppComponent,
-    LandingComponent
+    LandingComponent,
+    EpicAuthComponent
   ],
   imports: [
     BrowserModule,
