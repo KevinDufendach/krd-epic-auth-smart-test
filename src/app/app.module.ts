@@ -3,16 +3,29 @@ import { NgModule } from '@angular/core';
 
 
 import { AppComponent } from './app.component';
+import { LandingComponent } from './landing/landing.component';
+import {HttpClientModule} from '@angular/common/http';
+import {RouterModule, Routes} from '@angular/router';
+import {SmartAuthService} from './smart-auth.service';
 
+const appRoutes: Routes = [
+  {path: 'landing', component: LandingComponent}
+];
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    LandingComponent
   ],
   imports: [
-    BrowserModule
+    BrowserModule,
+    HttpClientModule,
+    RouterModule.forRoot(
+      appRoutes,
+      {enableTracing: true}
+    )
   ],
-  providers: [],
+  providers: [SmartAuthService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
