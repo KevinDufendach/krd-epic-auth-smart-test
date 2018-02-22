@@ -1,3 +1,4 @@
+///<reference path="../../node_modules/@types/node/index.d.ts"/>
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {ActivatedRoute} from '@angular/router';
@@ -38,9 +39,18 @@ export class SmartAuthService {
 
       const redirectUri = window.location.protocol + '//' + window.location.host + this.config.landingUri;
 
-      this.http.get(endpoint + 'metadata').subscribe( metadata => {
-        const jsMetadata = require('xml2js').parseFromString(metadata);
-        console.log(jsMetadata);
+      this.http.get(endpoint + 'metadata', {headers: new HttpHeaders().set('content-type', 'application/json')}).subscribe( metadata => {
+        // const jsMetadata = require('xml2js').parseFromString(metadata);
+        // console.log(jsMetadata);
+        // const parseString = require('xml2js').parseString;
+
+        console.log('metadata received');
+        console.log(metadata);
+        console.log(metadata['resourceType']);
+        // console.log(parseString(metadata, function (err, result) {
+        //   console.dir(result);
+        // }));
+        // console.log('got metadata');
       });
 
       // // const clientId = 'e4b32d61-d82e-4de0-b6ff-0f8f5f3ba887';
