@@ -7,6 +7,7 @@ import {Patient} from 'fhir';
 import {ErrorObservable} from 'rxjs/observable/ErrorObservable';
 import {SmartBundle} from './SmartBundle';
 import {of} from 'rxjs/observable/of';
+import '/assets/config.js';
 
 @Injectable()
 export class SmartAuthService {
@@ -25,6 +26,8 @@ export class SmartAuthService {
 
   constructor(private http: HttpClient) {
   }
+
+
 
   initialize(route: ActivatedRoute): Observable<SmartBundle> {
     if (this.sb) {
