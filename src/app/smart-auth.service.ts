@@ -9,6 +9,8 @@ import {ErrorObservable} from 'rxjs/observable/ErrorObservable';
 import {SmartBundle} from './SmartBundle';
 import {of} from 'rxjs/observable/of';
 import {AppConfig} from './app.config';
+import {FhirEndpoint} from './fhir-endpoint';
+import {FhirExtension} from './shared/fhir-extension';
 
 @Injectable()
 export class SmartAuthService {
@@ -21,6 +23,7 @@ export class SmartAuthService {
   // clientId: string;
   // secret: string;
   // redirectUri: string;
+  checkConnect: any;
   serviceUri: string;
   private sub: any;
   private sb: SmartBundle;
@@ -30,46 +33,117 @@ export class SmartAuthService {
     this.config = require('./config/app.config.json');
   }
 
-  connectToEndpoint(endpoint: string): Observable<SmartBundle> {
-    return new Observable<SmartBundle>(observer => {
-      const w = 0;
-      const h = 0;
-      const left = (screen.width / 2) - ( w / 2);
-      const top = ( screen.height / 2 ) - ( h / 2 );
+  getEndpointList(): Observable<FhirEndpoint[]> {
+    const endpoints = <FhirEndpoint[]>require('./config/epic-endpoints.json');
+    return of(endpoints);
+  }
 
-      const redirectUri = window.location.protocol + '//' + window.location.host + this.config.landingUri;
+  goToAuthenticationWebsite(w, h) {
+    const left = (screen.width / 2) - (w / 2);
+    const top = (screen.height / 2) - (h / 2);
+    const clientId = 'e4b32d61-d82e-4de0-b6ff-0f8f5f3ba887';
+    const redirectUri = 'http://localhost:4200/afterlaunch';
+    const baseUri = 'https://open-ic.epic.com/argonaut';
+    // const baseUri = 'https://epic-soap-test.uchealth.com/FHIRProxy';
+    const win = window.open(baseUri + '/oauth2/authorize?response_type=code&client_id=' + clientId + '&redirect_uri=' + redirectUri,
+      '_blank', 'location=yes,height=' + h + ',width=' + w + ',top=' + top + ',left=' + left + 'scrollbars=yes,status=yes');
+    this.checkConnect = window.setInterval(function () {
+      if (win.document.URL.indexOf('code') !== -1) {
+        window.clearInterval(this.checkConnect);
+        const url = win.document.URL;
+        win.opener.location.href = url;
+        win.close();
+      }
+    }, 800);
+  }
 
-      this.http.get(endpoint + 'metadata', {headers: new HttpHeaders().set('content-type', 'application/json')}).subscribe( metadata => {
-        // const jsMetadata = require('xml2js').parseFromString(metadata);
-        // console.log(jsMetadata);
-        // const parseString = require('xml2js').parseString;
+  connectToEndpoint(endpoint: string) {
+    // return new Observable<SmartBundle>(observer => {
+    console.log('Attempting to connect to endpoint ' + endpoint);
 
-        console.log('metadata received');
-        console.log(metadata);
-        console.log(metadata['resourceType']);
-        // console.log(parseString(metadata, function (err, result) {
-        //   console.dir(result);
-        // }));
-        // console.log('got metadata');
-      });
+    let authUri: string;
+    let tokenUri: string;
 
-      // // const clientId = 'e4b32d61-d82e-4de0-b6ff-0f8f5f3ba887';
-      // // const redirectUri = 'http://localhost:4200/afterlaunch';
-      // // const baseUri = 'https://open-ic.epic.com/argonaut';
-      // // const baseUri = 'https://epic-soap-test.uchealth.com/FHIRProxy';
-      // const win = window.open(this.config.launchUri +
-      // '/oauth2/authorize?response_type=code&client_id=' + clientId +
-      // '&redirect_uri=' + redirectUri,
-      //   '_blank', 'location=yes,height=' + h + ',width=' + w + ',top=' + top + ',left=' + left + 'scrollbars=yes,status=yes');
-      // window.setInterval(function() {
-      //   if (win.document.URL.indexOf('code') !== -1) {
-      //     window.clearInterval(this.checkConnect);
-      //     const url = win.document.URL;
-      //     win.opener.location.href = url;
-      //     win.close();
-      //   }
-      // }, 800);
+    const w = 0;
+    const h = 0;
+    const left = (screen.width / 2) - (w / 2);
+    const top = (screen.height / 2) - (h / 2);
+
+    const clientId = 'e4b32d61-d82e-4de0-b6ff-0f8f5f3ba887';
+    const redirectUri = 'http://localhost:4200/afterlaunch';
+    // const baseUri = 'https://open-ic.epic.com/argonaut';
+    // const baseUri = 'https://epic-soap-test.uchealth.com/FHIRProxy';
+    const win = window.open('https://open-ic.epic.com/Argonaut/oauth2/authorize?response_type=code&client_id=' + clientId + '&redirect_uri=' + redirectUri,
+      '_blank', 'location=yes,height=' + h + ',width=' + w + ',top=' + top + ',left=' + left + 'scrollbars=yes,status=yes');
+    this.checkConnect = window.setInterval(function () {
+      if (win.document.URL.indexOf('code') !== -1) {
+        window.clearInterval(this.checkConnect);
+        const url = win.document.URL;
+        win.opener.location.href = url;
+        win.close();
+      }
+    }, 800);
+
+
+    // const redirectUri = window.location.protocol + '//' + window.location.host + this.config.landingUri;
+
+    this.http.get(endpoint + 'metadata', {headers: new HttpHeaders().set('content-type', 'application/json')}).subscribe(metadata => {
+      try {
+        const extensions = <FhirExtension[]>metadata['rest'][0]['security']['extension'][0]['extension'];
+        for (const extension of extensions) {
+          if (extension.url === 'authorize') {
+            authUri = extension.valueUri;
+          } else if (extension.url === 'token') {
+            tokenUri = extension.valueUri;
+          }
+        }
+      } catch (e) {
+        console.log('Error retreiving conformance extensions: ' + e);
+      }
+
+      console.log(authUri);
+      console.log(tokenUri);
+
+      if (authUri && tokenUri) {
+        // const authWindowUri = authUri + '?response_type=code&client_id='
+        // + this.config.clientId + '&redirect_uri=' + this.config.landingUri;
+        // const authWindowUri = authUri + '?response_type=code&client_id='
+        // + this.config.clientId + '&redirect_uri=' + 'http://localhost:4200/afterlaunch';
+        // const win = window.open(
+        //   authWindowUri,
+        //   '_blank',
+        //   'location=yes,height=' + h + ',width=' + w + ',top=' + top + ',left=' + left + 'scrollbars=yes,status=yes');
+        // this.checkConnect = window.setInterval(function () {
+        //   if (win.document.URL.indexOf('code') !== -1) {
+        //     window.clearInterval(this.checkConnect);
+        //     const url = win.document.URL;
+        //     win.opener.location.href = url;
+        //     win.close();
+        //   }
+        // }, 800);
+
+        // const left = (screen.width / 2) - ( w / 2);
+        // const top = ( screen.height / 2 ) - ( h / 2 );
+      }
+
     });
+    // // const clientId = 'e4b32d61-d82e-4de0-b6ff-0f8f5f3ba887';
+    // // const redirectUri = 'http://localhost:4200/afterlaunch';
+    // // const baseUri = 'https://open-ic.epic.com/argonaut';
+    // // const baseUri = 'https://epic-soap-test.uchealth.com/FHIRProxy';
+    // const win = window.open(this.config.launchUri +
+    // '/oauth2/authorize?response_type=code&client_id=' + clientId +
+    // '&redirect_uri=' + redirectUri,
+    //   '_blank', 'location=yes,height=' + h + ',width=' + w + ',top=' + top + ',left=' + left + 'scrollbars=yes,status=yes');
+    // window.setInterval(function() {
+    //   if (win.document.URL.indexOf('code') !== -1) {
+    //     window.clearInterval(this.checkConnect);
+    //     const url = win.document.URL;
+    //     win.opener.location.href = url;
+    //     win.close();
+    //   }
+    // }, 800);
+    // });
   }
 
   initialize(route: ActivatedRoute): Observable<SmartBundle> {
@@ -146,5 +220,4 @@ export class SmartAuthService {
     }
     return urlParams[sParam];
   }
-
 }
