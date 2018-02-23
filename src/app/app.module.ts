@@ -8,6 +8,7 @@ import {HttpClientModule} from '@angular/common/http';
 import {RouterModule, Routes} from '@angular/router';
 import {SmartAuthService} from './smart-auth.service';
 import { EpicAuthComponent } from './epic-auth/epic-auth.component';
+import {MaterialModule} from './material.module';
 
 const appRoutes: Routes = [
   {path: 'landing', component: LandingComponent}
@@ -25,7 +26,8 @@ const appRoutes: Routes = [
     RouterModule.forRoot(
       appRoutes,
       {enableTracing: true}
-    )
+    ),
+    MaterialModule
   ],
   providers: [SmartAuthService],
   bootstrap: [AppComponent]
