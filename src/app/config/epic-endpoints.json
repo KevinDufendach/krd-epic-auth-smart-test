@@ -4,6 +4,10 @@
     "FHIRPatientFacingURI": "https://open-ic.epic.com/argonaut/api/FHIR/Argonaut/"
   },
   {
+    "OrganizationName": "University of Cincinnati Health",
+    "FHIRPatientFacingURI": "https://epic-soap-test.uchealth.com/FHIRProxy/api/FHIR/DSTU2/"
+  },
+  {
     "OrganizationName": "AdvantageCare Physicians",
     "FHIRPatientFacingURI": "https://epwebapps.acpny.com/FHIRproxy/api/FHIR/DSTU2/"
   },
